@@ -1,5 +1,10 @@
 # a persona-5 like data visualization web app
 
+## Preview
+
+https://el-dorado.github.io/bilibili-trend/
+
+
 ## How To Run
 
 ```bash
