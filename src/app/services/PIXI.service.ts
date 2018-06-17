@@ -45,6 +45,8 @@ export class PIXIService {
     let lastRectX = 0
     const generatorRect = (s: string, index: number) => {
       const text = new PIXI.Text(s, style)
+      text.style.dropShadow = true
+
       const rect = new PIXI.Graphics()
       rect.lineStyle(5, Colors.white, 1)
       rect.addChild(text)
