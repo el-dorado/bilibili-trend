@@ -13,6 +13,11 @@ cd bilibili-trend
 yarn 
 # or
 npm install
+
+# Run
+yarn server:dev:hmr
+# or
+npm run server:dev:hmr
 ```
 
 **Note:** 9.0.0 => Node.js >= 8.0.0
