@@ -1,20 +1,17 @@
 {
-  "name": "angular-starter",
+  "name": "bilibili-trend",
   "version": "7.5.0",
-  "description": "An Angular Webpack Starter kit featuring Angular (Router, Http, Forms, Services, Tests, E2E, Coverage), Karma, Protractor, Jasmine, Istanbul, TypeScript, and Webpack by Tipe.io",
+  "description": "a persona-5 like data visualization web app",
   "keywords": [
     "angular",
     "angular2",
     "angular4",
     "angular5",
     "webpack",
-    "typescript",
-    "tipe",
-    "tipe.io"
+    "typescript"
   ],
-  "author": "Patrick Stapleton <patrick@tipe.io>",
-  "homepage": "https://github.com/gdi2290/angular-starter",
-  "license": "MIT",
+  "homepage": "https://github.com/el-dorado/bilibili-trend",
+  "license": "WTFPL",
   "scripts": {
     "build:aot:prod": "npm run clean:dist && npm run clean:aot && cross-env BUILD_AOT=1 SOURCE_MAP=0 npm run webpack -- --config config/webpack.prod.js  --progress --profile --bail",
     "build:aot": "npm run build:aot:prod",
@@ -180,10 +177,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gdi2290/angular-starter.git"
+    "url": "https://github.com/el-dorado/bilibili-trend"
   },
   "bugs": {
-    "url": "https://github.com/gdi2290/angular-starter/issues"
+    "url": "https://github.com/el-dorado/bilibili-trend/issues"
   },
   "engines": {
     "node": ">= 8.0.0",
