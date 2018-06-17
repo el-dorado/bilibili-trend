@@ -2,10 +2,12 @@ import { Injectable } from '@angular/core'
 import * as PIXI from 'pixi.js'
 import {
   Colors,
-  getStyle
+  getStyle,
+  range
 } from '../utils'
 import * as R from 'ramda'
 import TextStyleOptions = PIXI.TextStyleOptions
+import { forEach } from 'ramda'
 
 @Injectable()
 export class PIXIService {
@@ -15,8 +17,14 @@ export class PIXIService {
   private _canvas: HTMLCanvasElement
   private _canvasContext: CanvasRenderingContext2D | null
   private _origin: any
+  private _view: HTMLCanvasElement
 
   public initialize(config: PIXIConfig) {
+    const animate = () => {
+      this._renderer.render(this._stage)
+      requestAnimationFrame(animate)
+    }
+
     const target = config.target
     this._origin = {
       width: getStyle(target, 'width'),
@@ -31,14 +39,20 @@ export class PIXIService {
     })
     this._canvas = config.target
     this._renderer = this._app.renderer
+    this._view = this._app.view
     this._stage = this._app.stage
-
-    this.handleConfig(config)
+    this._renderer.backgroundColor = Colors.black
+    animate()
+    // this.handleConfig(config)
 
     this.initTitle()
+    this.initMenu()
 
-    this._renderer.backgroundColor = Colors.black
+  }
 
+  private initMenu() {
+    const star = this.drawStar(5)
+    this._stage.addChild(star)
   }
 
   private initTitle() {
@@ -107,12 +121,22 @@ export class PIXIService {
     this._stage.addChild(textContainer)
   }
 
-  private drawRect() {
-    const rect = new PIXI.Graphics()
-    rect.beginFill(Colors.white)
-    rect.drawRect(0, 0, 20, 25)
-    rect.endFill()
-    return rect
+  private drawStar(count = 5): PIXI.Graphics {
+    const offset = 40
+    const graphics = new PIXI.Graphics()
+
+    range(count + 1, 1, -1).map((v) => {
+      console.log(v)
+      const color = v % 2 === 0 ? Colors.white : Colors.black
+      graphics.beginFill(color)
+      graphics.drawStar(this._view.width - offset, this._view.height - offset,
+        5, v * 4, 15)
+      graphics.endFill()
+    })
+
+    graphics.interactive = true
+    graphics.cursor = 'pointer'
+    return graphics
   }
 
   // TODO 待修正
