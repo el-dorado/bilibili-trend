@@ -61,7 +61,7 @@ export class PIXIService {
 
   private initMenu() {
     const offset = 40
-    const star = this.drawStar(5)
+    const star = this.drawStar(8)
 
     const showStage = new PIXI.Container()
 
@@ -146,7 +146,7 @@ export class PIXIService {
       const color = v % 2 === 0 ? Colors.white : Colors.black
       graphics.beginFill(color)
       graphics.drawStar(offset, offset,
-        5, v * 4, 15)
+        5, v * 4, count * 2)
       graphics.endFill()
     })
 
@@ -176,18 +176,24 @@ export class PIXIService {
     const fpsText = new PIXI.Text('', {
       fontFamily: ['persona', 'Arial'],
       align: 'center',
-      fontStyle: 'italic',
       fontWeight: 'bold',
       fill: Colors.white,
+      dropShadow: true,
     })
 
-    const textRect = new PIXI.Graphics()
+    fpsText.skew.set(-0.5, 0)
     const textContainer = new PIXI.Container()
+    textContainer.position.set(15, this._view.height - 30)
 
-    textContainer.position.set(0, this._view.height - 30)
+    const textRect = new PIXI.Graphics()
 
     textContainer.addChild(textRect)
     textContainer.addChild(fpsText)
+
+    textRect.beginFill(Colors.red)
+    textRect.drawStar(textContainer.x, textContainer.y, 10, 10, 10)
+    textRect.endFill()
+
     this._stage.addChild(textContainer)
     return fpsText
   }
