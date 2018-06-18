@@ -8,6 +8,7 @@ import {
 import * as R from 'ramda'
 import TextStyleOptions = PIXI.TextStyleOptions
 import { forEach } from 'ramda'
+import InteractionEvent = PIXI.interaction.InteractionEvent;
 
 @Injectable()
 export class PIXIService {
@@ -18,9 +19,12 @@ export class PIXIService {
   private _canvasContext: CanvasRenderingContext2D | null
   private _origin: any
   private _view: HTMLCanvasElement
+  private _screen: PIXI.Rectangle;
 
   public initialize(config: PIXIConfig) {
     const animate = () => {
+
+      fpsText.text = 'FPS:' + String(this._app.ticker.FPS.toFixed(1))
       this._renderer.render(this._stage)
       requestAnimationFrame(animate)
     }
@@ -41,18 +45,31 @@ export class PIXIService {
     this._renderer = this._app.renderer
     this._view = this._app.view
     this._stage = this._app.stage
+    this._screen = this._app.screen
     this._renderer.backgroundColor = Colors.black
+
+
+    const fpsText = this.initFPS()
+    this.initTitle()
+    this.initMenu()
+
     animate()
     // this.handleConfig(config)
 
-    this.initTitle()
-    this.initMenu()
 
   }
 
   private initMenu() {
+    const offset = 40
     const star = this.drawStar(5)
-    this._stage.addChild(star)
+
+    const showStage = new PIXI.Container()
+
+    showStage.position.set(this._view.width - 80, offset)
+    showStage.addChild(star)
+    this._stage.addChild(showStage)
+
+
   }
 
   private initTitle() {
@@ -126,10 +143,9 @@ export class PIXIService {
     const graphics = new PIXI.Graphics()
 
     range(count + 1, 1, -1).map((v) => {
-      console.log(v)
       const color = v % 2 === 0 ? Colors.white : Colors.black
       graphics.beginFill(color)
-      graphics.drawStar(this._view.width - offset, this._view.height - offset,
+      graphics.drawStar(offset, offset,
         5, v * 4, 15)
       graphics.endFill()
     })
@@ -155,6 +171,26 @@ export class PIXIService {
     }
   }
 
+
+  private initFPS() {
+    const fpsText = new PIXI.Text('', {
+      fontFamily: ['persona', 'Arial'],
+      align: 'center',
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+      fill: Colors.white,
+    })
+
+    const textRect = new PIXI.Graphics()
+    const textContainer = new PIXI.Container()
+
+    textContainer.position.set(0, this._view.height - 30)
+
+    textContainer.addChild(textRect)
+    textContainer.addChild(fpsText)
+    this._stage.addChild(textContainer)
+    return fpsText
+  }
 }
 
 export interface PIXIConfig {
