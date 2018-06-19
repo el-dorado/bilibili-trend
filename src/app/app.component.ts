@@ -2,12 +2,19 @@
  * Angular 2 decorators and services
  */
 import {
+  AfterContentInit,
   Component,
   OnInit,
   ViewEncapsulation
 } from '@angular/core'
 import { environment } from 'environments/environment'
 import { AppState } from './app.service'
+import {
+  PIXIConfig,
+  PIXIService
+} from './services/PIXI.service';
+import { GSAPService } from './services/GSAP.service';
+
 
 /**
  * App Component
@@ -17,25 +24,39 @@ import { AppState } from './app.service'
   selector: 'app',
   encapsulation: ViewEncapsulation.None,
   styleUrls: [
-    './app.component.css'
+    './app.component.scss'
   ],
   template: `
     <main>
-      <router-outlet></router-outlet>
+      <!--<router-outlet></router-outlet>-->
+      <div id="canvas-container" #canvasContainer>
+        <canvas id="canvas"></canvas>
+      </div>
     </main>
   `
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterContentInit {
+  private pixi: PIXIService;
+  private gasp: GSAPService;
 
-  public tipe = 'assets/img/tipe.png'
+  constructor(public appState: AppState,
+              _pixi: PIXIService) {
+    this.pixi = _pixi
 
-  constructor(
-    public appState: AppState
-  ) {
   }
 
   public ngOnInit() {
-    console.log('Initial App State', this.appState.state)
+
+  }
+
+  ngAfterContentInit(): void {
+    const canvas = document.querySelector('#canvas') as HTMLCanvasElement
+
+    const config: PIXIConfig = {
+      target: canvas,
+      autoSize: true,
+    }
+    this.pixi.initialize(config)
   }
 
 }

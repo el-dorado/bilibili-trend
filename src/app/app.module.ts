@@ -26,6 +26,7 @@ import '../styles/styles.scss'
 import '../styles/headings.css'
 import { ThreeService } from './services'
 import { PIXIService } from './services/PIXI.service'
+import { GSAPService } from './services/GSAP.service';
 
 // Application wide providers
 const APP_PROVIDERS = [
@@ -68,6 +69,7 @@ interface StoreType {
     environment.ENV_PROVIDERS,
     APP_PROVIDERS,
     PIXIService,
+    GSAPService,
   ]
 })
 export class AppModule {

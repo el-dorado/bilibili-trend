@@ -5,10 +5,16 @@ import {
   getStyle,
   range
 } from '../utils'
-import * as R from 'ramda'
 import TextStyleOptions = PIXI.TextStyleOptions
-import { forEach } from 'ramda'
-import InteractionEvent = PIXI.interaction.InteractionEvent;
+import { GSAPService } from './GSAP.service';
+import {
+  TweenLite,
+  TweenMax,
+  TimelineLite,
+  TimelineMax,
+} from 'gsap'
+import 'pixi-layers'
+import { Linear } from 'gsap';
 
 @Injectable()
 export class PIXIService {
@@ -20,6 +26,15 @@ export class PIXIService {
   private _origin: any
   private _view: HTMLCanvasElement
   private _screen: PIXI.Rectangle;
+  private _topLayer: PIXI.display.Layer;
+  private _container: PIXI.Container;
+
+  // private _gasp: GSAPService;
+
+
+  constructor(gsap: GSAPService) {
+    // this._gasp = gsap
+  }
 
   public initialize(config: PIXIConfig) {
     const animate = () => {
@@ -44,10 +59,15 @@ export class PIXIService {
     this._canvas = config.target
     this._renderer = this._app.renderer
     this._view = this._app.view
-    this._stage = this._app.stage
+    this._stage = new PIXI.display.Stage()
     this._screen = this._app.screen
+    this._topLayer = new PIXI.display.Layer()
+    this._container = new PIXI.Container()
+
     this._renderer.backgroundColor = Colors.black
 
+    this._stage.addChild(this._container)
+    this._stage.addChild(this._topLayer)
 
     const fpsText = this.initFPS()
     this.initTitle()
@@ -67,10 +87,10 @@ export class PIXIService {
 
     showStage.position.set(this._view.width - 80, offset)
     showStage.addChild(star)
-    this._stage.addChild(showStage)
-
+    this._container.addChild(showStage)
 
   }
+
 
   private initTitle() {
     let lastRectX = 0
@@ -135,7 +155,7 @@ export class PIXIService {
     // 居中
     textContainer.x = texts.length * 10
     textContainer.y = 50
-    this._stage.addChild(textContainer)
+    this._container.addChild(textContainer)
   }
 
   private drawStar(count = 5): PIXI.Graphics {
@@ -172,6 +192,37 @@ export class PIXIService {
   }
 
 
+  private addStarAnimation(target: PIXI.Container) {
+    const x = target.x - 15
+    const y = target.y - 10
+    const width = target.width
+    const height = target.height
+    const star = this.drawStar(5)
+    star.scale.set(0.3, 0.3)
+    const startList = new TimelineLite()
+
+    startList.addLabel('moving', 5)
+
+    const starContainer = new PIXI.Container()
+    starContainer.position.set(x, y)
+    starContainer.height = height
+    starContainer.width = width
+    starContainer.addChild(star)
+
+    this._container.addChild(starContainer)
+    target.zIndex = 9
+    starContainer.zIndex = 0
+
+    TweenMax.to(starContainer.position, 1.5, {
+      x: x + width * 2,
+      repeat: -1,
+      ease: Linear.easeNone
+    })
+
+    startList.play('moving')
+
+  }
+
   private initFPS() {
     const fpsText = new PIXI.Text('', {
       fontFamily: ['persona', 'Arial'],
@@ -194,7 +245,10 @@ export class PIXIService {
     textRect.drawStar(textContainer.x, textContainer.y, 10, 10, 10)
     textRect.endFill()
 
-    this._stage.addChild(textContainer)
+    this._container.addChild(textContainer)
+
+    this.addStarAnimation(textContainer)
+
     return fpsText
   }
 }
