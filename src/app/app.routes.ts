@@ -1,8 +1,10 @@
 import { Routes } from '@angular/router'
-import { HomeComponent } from './home'
 
 export const ROUTES: Routes = [
-  { path: '',      component: HomeComponent },
+  // {
+  //   path: '',
+  //   component: HomeComponent
+  // },
   // { path: 'barrel', loadChildren: './+barrel#BarrelModule'},
   // { path: '**',    component: NoContentComponent },
 ]

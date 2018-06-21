@@ -142,7 +142,7 @@ export class ThreeService {
       line2.position.x = (v * 50) - 500
       line2.rotation.y = 90 * Math.PI / 180
       this.scene.add(line2)
-    }, range(0, 20))
+    }, range(0,0, 20))
 
     geometry.vertices.push(p1)
     geometry.vertices.push(p2)

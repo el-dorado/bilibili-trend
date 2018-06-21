@@ -6,7 +6,7 @@ import {
   range
 } from '../utils'
 import TextStyleOptions = PIXI.TextStyleOptions
-import { GSAPService } from './GSAP.service';
+import { GSAPService } from './GSAP.service'
 import {
   TweenLite,
   TweenMax,
@@ -14,68 +14,57 @@ import {
   TimelineMax,
 } from 'gsap'
 import 'pixi-layers'
-import { Linear } from 'gsap';
+import { Linear } from 'gsap'
 
 @Injectable()
 export class PIXIService {
-  private _app: PIXI.Application
+  public app: PIXI.Application
   private _renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer
-  private _stage: PIXI.Container
-  private _canvas: HTMLCanvasElement
-  private _canvasContext: CanvasRenderingContext2D | null
   private _origin: any
   private _view: HTMLCanvasElement
-  private _screen: PIXI.Rectangle;
-  private _topLayer: PIXI.display.Layer;
-  private _container: PIXI.Container;
-
-  // private _gasp: GSAPService;
-
-
-  constructor(gsap: GSAPService) {
-    // this._gasp = gsap
-  }
+  private _topLayer: PIXI.display.Layer
+  private _middleLayer: PIXI.display.Layer
+  private _bottomLayer: PIXI.display.Layer
+  private _stage: PIXI.Container
+  private _layer: PIXI.display.Layer
 
   public initialize(config: PIXIConfig) {
     const animate = () => {
 
-      fpsText.text = 'FPS:' + String(this._app.ticker.FPS.toFixed(1))
+      // fpsText.text = 'FPS:' + String(this.app.ticker.FPS.toFixed(1))
       this._renderer.render(this._stage)
       requestAnimationFrame(animate)
     }
 
-    const target = config.target
-    this._origin = {
-      width: getStyle(target, 'width'),
-      height: getStyle(target, 'height'),
-    }
-    this._app = new PIXI.Application({
-      view: target,
-      width: this._origin.width,
-      height: this._origin.height,
+    this.app = new PIXI.Application({
+      width: config.width,
+      height: config.height,
       antialias: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
+      autoResize: true,
+      resolution: devicePixelRatio,
+      view: document.querySelector('#canvas')
     })
-    this._canvas = config.target
-    this._renderer = this._app.renderer
-    this._view = this._app.view
-    this._stage = new PIXI.display.Stage()
-    this._screen = this._app.screen
+
+    this.app.stage = new PIXI.display.Stage()
+    this._stage = this.app.stage
+
+    // const fpsText = this.initFPS()
+    // this.initTitle()
+    // this.initMenu()
+
     this._topLayer = new PIXI.display.Layer()
-    this._container = new PIXI.Container()
+    this._middleLayer = new PIXI.display.Layer()
+    this._bottomLayer = new PIXI.display.Layer()
 
-    this._renderer.backgroundColor = Colors.black
+    // this._renderer.render(this._stage)
 
-    this._stage.addChild(this._container)
-    this._stage.addChild(this._topLayer)
+    this.app.stage.addChild(this._topLayer)
+    this.app.stage.addChild(this._middleLayer)
+    this.app.stage.addChild(this._bottomLayer)
 
-    const fpsText = this.initFPS()
-    this.initTitle()
-    this.initMenu()
-
-    animate()
+    // animate()
     // this.handleConfig(config)
-
 
   }
 
@@ -83,14 +72,13 @@ export class PIXIService {
     const offset = 40
     const star = this.drawStar(8)
 
-    const showStage = new PIXI.Container()
+    const showStage = new PIXI.display.Layer()
 
     showStage.position.set(this._view.width - 80, offset)
     showStage.addChild(star)
-    this._container.addChild(showStage)
+    this._stage.addChild(showStage)
 
   }
-
 
   private initTitle() {
     let lastRectX = 0
@@ -142,20 +130,19 @@ export class PIXIService {
 
     const texts = 'BiliBili 趋 势'.replace(/[ ]/g, '').split('')
 
-    const textContainer = new PIXI.Container()
+    const textContainer = new PIXI.display.Layer()
 
     texts.forEach((s: string, i: number) => {
       const rect = Math.round(Math.random()) === 0
         ? generatorRect(s, i).red()
         : generatorRect(s, i).black()
-
       textContainer.addChild(rect)
     })
 
     // 居中
     textContainer.x = texts.length * 10
     textContainer.y = 50
-    this._container.addChild(textContainer)
+    this._stage.addChild(textContainer)
   }
 
   private drawStar(count = 5): PIXI.Graphics {
@@ -175,23 +162,6 @@ export class PIXIService {
     return graphics
   }
 
-  // TODO 待修正
-  private handleConfig(config: PIXIConfig) {
-    if (config.autoSize) {
-      this._renderer.autoResize = true
-      window.onresize = (e) => {
-        const w = window.innerWidth
-        const h = window.innerHeight
-
-        this._stage.scale.x = w / this._origin.width
-        this._stage.scale.y = h / this._origin.height
-        this._app.renderer.resize(window.innerWidth, window.innerHeight)
-      }
-
-    }
-  }
-
-
   private addStarAnimation(target: PIXI.Container) {
     const x = target.x - 15
     const y = target.y - 10
@@ -203,15 +173,17 @@ export class PIXIService {
 
     startList.addLabel('moving', 5)
 
-    const starContainer = new PIXI.Container()
+    const starContainer = new PIXI.display.Layer()
     starContainer.position.set(x, y)
     starContainer.height = height
     starContainer.width = width
     starContainer.addChild(star)
 
-    this._container.addChild(starContainer)
-    target.zIndex = 9
-    starContainer.zIndex = 0
+    // starContainer.parentGroup = this._bottomGroup
+    starContainer.zIndex = 1
+    starContainer.parentLayer = this._layer
+
+    this._stage.addChild(starContainer)
 
     TweenMax.to(starContainer.position, 1.5, {
       x: x + width * 2,
@@ -232,8 +204,10 @@ export class PIXIService {
       dropShadow: true,
     })
 
+    // 设置 倾斜
     fpsText.skew.set(-0.5, 0)
-    const textContainer = new PIXI.Container()
+    const textContainer = new PIXI.display.Layer()
+
     textContainer.position.set(15, this._view.height - 30)
 
     const textRect = new PIXI.Graphics()
@@ -245,15 +219,20 @@ export class PIXIService {
     textRect.drawStar(textContainer.x, textContainer.y, 10, 10, 10)
     textRect.endFill()
 
-    this._container.addChild(textContainer)
+    textContainer.zIndex = 10
+    textContainer.parentLayer = this._layer
+
+    this._stage.addChild(textContainer)
 
     this.addStarAnimation(textContainer)
 
     return fpsText
   }
+
 }
 
 export interface PIXIConfig {
-  target: HTMLCanvasElement
-  autoSize?: boolean
+  width: number,
+  height: number,
+  ratio: number,
 }

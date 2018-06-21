@@ -14,6 +14,9 @@ import {
   PIXIService
 } from './services/PIXI.service';
 import { GSAPService } from './services/GSAP.service';
+import { Observable } from 'rxjs/Observable';
+import { EventTargetLike } from 'rxjs/src/observable/FromEventObservable';
+import { debounceTime } from 'rxjs/operators';
 
 
 /**
@@ -27,12 +30,7 @@ import { GSAPService } from './services/GSAP.service';
     './app.component.scss'
   ],
   template: `
-    <main>
-      <!--<router-outlet></router-outlet>-->
-      <div id="canvas-container" #canvasContainer>
-        <canvas id="canvas"></canvas>
-      </div>
-    </main>
+    <canvas id="canvas"></canvas>
   `
 })
 export class AppComponent implements OnInit, AfterContentInit {
@@ -50,13 +48,27 @@ export class AppComponent implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    const canvas = document.querySelector('#canvas') as HTMLCanvasElement
-
     const config: PIXIConfig = {
-      target: canvas,
-      autoSize: true,
+      width: 2560,
+      height: 1440,
+      ratio: 2560 / 1440,
     }
     this.pixi.initialize(config)
+    Observable.fromEvent(window, 'resize')
+      .pipe(
+        debounceTime(200),
+      )
+      .subscribe((e: EventTarget | EventTargetLike | any) => {
+        // const ratio = Math.min(window.innerWidth / config.width,
+        //   window.innerHeight / config.height)
+        //
+        // this.pixi.app.renderer.resize(Math.ceil(config.width * ratio),
+        //   Math.ceil(config.height * ratio))
+        this.pixi.app.renderer.resize(window.innerWidth, window.innerHeight);
+
+      })
+
+
   }
 
 }
