@@ -15,6 +15,9 @@ import {
 } from 'gsap'
 import 'pixi-layers'
 import { Linear } from 'gsap'
+import { debounceTime } from 'rxjs/operators';
+import { EventTargetLike } from 'rxjs/src/observable/FromEventObservable';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class PIXIService {
@@ -27,12 +30,13 @@ export class PIXIService {
   private _bottomLayer: PIXI.display.Layer
   private _stage: PIXI.Container
   private _layer: PIXI.display.Layer
+  private _container: PIXI.Container;
 
   public initialize(config: PIXIConfig) {
     const animate = () => {
 
       // fpsText.text = 'FPS:' + String(this.app.ticker.FPS.toFixed(1))
-      this._renderer.render(this._stage)
+      this._renderer.render(this._container)
       requestAnimationFrame(animate)
     }
 
@@ -43,27 +47,41 @@ export class PIXIService {
       backgroundColor: Colors.black,
       autoResize: true,
       resolution: devicePixelRatio,
-      view: document.querySelector('#canvas')
+      view: document.querySelector('#canvas'),
     })
 
-    this.app.stage = new PIXI.display.Stage()
     this._stage = this.app.stage
+    this._view = this.app.view
+    this._renderer = this.app.renderer
 
-    // const fpsText = this.initFPS()
+    this._container = new PIXI.Container()
+    this._topLayer = new PIXI.display.Layer()
+
+    this._stage.addChild(this._container)
+    this._stage.addChild(this._topLayer)
+
+    Observable.fromEvent(window, 'resize')
+      .pipe(debounceTime(200))
+      .subscribe((e: EventTarget | EventTargetLike | any) => {
+        this.app.renderer.resize(window.innerWidth, window.innerHeight);
+      })
+
+    const fpsText = this.initFPS()
     // this.initTitle()
     // this.initMenu()
 
-    this._topLayer = new PIXI.display.Layer()
-    this._middleLayer = new PIXI.display.Layer()
-    this._bottomLayer = new PIXI.display.Layer()
+
+    // this._topLayer = new PIXI.display.Layer()
+    // this._middleLayer = new PIXI.display.Layer()
+    // this._bottomLayer = new PIXI.display.Layer()
 
     // this._renderer.render(this._stage)
 
-    this.app.stage.addChild(this._topLayer)
-    this.app.stage.addChild(this._middleLayer)
-    this.app.stage.addChild(this._bottomLayer)
+    // this.app.stage.addChild(this._topLayer)
+    // this.app.stage.addChild(this._middleLayer)
+    // this.app.stage.addChild(this._bottomLayer)
 
-    // animate()
+    animate()
     // this.handleConfig(config)
 
   }
@@ -183,7 +201,7 @@ export class PIXIService {
     starContainer.zIndex = 1
     starContainer.parentLayer = this._layer
 
-    this._stage.addChild(starContainer)
+    this._container.addChild(starContainer)
 
     TweenMax.to(starContainer.position, 1.5, {
       x: x + width * 2,
@@ -222,7 +240,7 @@ export class PIXIService {
     textContainer.zIndex = 10
     textContainer.parentLayer = this._layer
 
-    this._stage.addChild(textContainer)
+    this._container.addChild(textContainer)
 
     this.addStarAnimation(textContainer)
 
