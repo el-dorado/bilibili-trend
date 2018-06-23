@@ -7,16 +7,12 @@ import {
   OnInit,
   ViewEncapsulation
 } from '@angular/core'
-import { environment } from 'environments/environment'
 import { AppState } from './app.service'
 import {
   PIXIConfig,
   PIXIService
-} from './services/PIXI.service';
-import { GSAPService } from './services/GSAP.service';
-import { Observable } from 'rxjs/Observable';
-import { EventTargetLike } from 'rxjs/src/observable/FromEventObservable';
-import { debounceTime } from 'rxjs/operators';
+} from './services/PIXI.service'
+import { GSAPService } from './services/GSAP.service'
 
 
 /**
@@ -33,9 +29,8 @@ import { debounceTime } from 'rxjs/operators';
     <canvas id="canvas"></canvas>
   `
 })
-export class AppComponent implements OnInit, AfterContentInit {
-  private pixi: PIXIService;
-  private gasp: GSAPService;
+export class AppComponent implements AfterContentInit {
+  private pixi: PIXIService
 
   constructor(public appState: AppState,
               _pixi: PIXIService) {
@@ -43,15 +38,11 @@ export class AppComponent implements OnInit, AfterContentInit {
 
   }
 
-  public ngOnInit() {
-
-  }
-
-  ngAfterContentInit(): void {
+  public ngAfterContentInit(): void {
     const config: PIXIConfig = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      ratio: window.innerWidth / window.innerHeight,
+      width: 1920,
+      height: 1080,
+      ratio: 1920 / 1080,
     }
     this.pixi.initialize(config)
 
