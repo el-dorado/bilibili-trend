@@ -38,6 +38,7 @@ declare var $: any;
  *
 
 import * as _ from 'lodash'
+import * as PIXI from 'pixi.js';
 
  * You can include your type definitions in this file until you create one for the @types
  *
@@ -76,6 +77,10 @@ interface SystemJS {
   import: (path?: string) => Promise<any>
 }
 
+declare class Graphics extends PIXI.Graphics {
+  oldx: number;
+}
+
 interface GlobalEnvironment {
   ENV: string
   HMR: boolean
@@ -91,15 +96,15 @@ type FactoryPromise = () => Promise<any>
 
 interface AsyncRoutes {
   [component: string]: Es6PromiseLoader |
-    Function |
-    FactoryEs6PromiseLoader |
-    FactoryPromise
+  Function |
+  FactoryEs6PromiseLoader |
+  FactoryPromise
 }
 
 type IdleCallbacks = Es6PromiseLoader |
   Function |
   FactoryEs6PromiseLoader |
-  FactoryPromise 
+  FactoryPromise
 
 interface WebpackModule {
   hot: {
