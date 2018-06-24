@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { Colors } from '../utils'
+import { PGraphics } from '.'
 
 /**
  * 创建一个 PIXI.Text 对象
@@ -15,4 +16,12 @@ export function createText(text, szie = 12) {
     fill: Colors.white,
     dropShadow: true,
   })
+}
+
+export function createButton(width, height) {
+  const btn = new PGraphics()
+
+
+
+  return btn
 }

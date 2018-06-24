@@ -25,7 +25,11 @@ import {
   onDragStart,
   createText,
   PGraphics,
+  subscribe,
 } from '../pixi'
+import { Color } from 'three'
+import { parseCookieValue } from '@angular/common/src/cookie'
+import { Container } from '@angular/compiler/src/i18n/i18n_ast'
 
 @Injectable()
 export class PIXIService {
@@ -36,17 +40,6 @@ export class PIXIService {
   private renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer
 
   public initialize(config: PIXIConfig) {
-    const subscribe = (obj) => {
-      obj.interactive = true
-      obj.on('mousedown', onDragStart)
-        .on('touchstart', onDragStart)
-        .on('mouseup', onDragEnd)
-        .on('mouseupoutside', onDragEnd)
-        .on('touchend', onDragEnd)
-        .on('touchendoutside', onDragEnd)
-        .on('mousemove', onDragMove)
-        .on('touchmove', onDragMove)
-    }
 
     this.app = new PIXI.Application({
       width: config.width,
@@ -90,9 +83,11 @@ export class PIXIService {
 
     const FPSContaniner = new PIXI.Container()
     const TitleContaniner = new PIXI.Container()
+    const CookieContianer = new PIXI.Container()
 
     this.stage.addChild(FPSContaniner)
     this.stage.addChild(TitleContaniner)
+    this.stage.addChild(CookieContianer)
 
     subscribe(FPSContaniner)
     const FPS = this.createFPS()
@@ -108,6 +103,13 @@ export class PIXIService {
       v.parentGroup = dragGroup
       TitleContaniner.addChild(v)
     })
+
+    const cookie = this.crateCookie()
+    CookieContianer.addChild(cookie)
+
+    CookieContianer.position.set(this.view.width / 2, 20)
+
+    this.stage.addChild(CookieContianer)
 
     this.app.ticker.add((dalta) => {
       FPS.text = this.app.ticker.FPS.toFixed(2)
@@ -129,7 +131,7 @@ export class PIXIService {
   // }
 
   private createTitle() {
-    PIXI.Graphics["oldx"] = 0
+    PIXI.Graphics['oldx'] = 0
     let lastRectX = 0
     const style: TextStyleOptions = {
       fontFamily: ['persona', 'Arial'],
@@ -188,7 +190,7 @@ export class PIXIService {
       v.interactive = true
       v.buttonMode = true
       if (i !== title.length - 1) {
-        v.on("pointerdown", (e) => {
+        v.on('pointerdown', (e) => {
           title.map((s) => {
             TweenMax.to(s.position, 0.2, {
               x: v.x,
@@ -199,7 +201,7 @@ export class PIXIService {
       }
     })
 
-    title[title.length - 1].on("pointerdown", (e) => {
+    title[title.length - 1].on('pointerdown', (e) => {
       title.map((s) => {
         TweenMax.to(s.position, 0.2, {
           x: s.oldx,
@@ -211,44 +213,25 @@ export class PIXIService {
     return title
   }
 
-  // private addStarAnimation(target: PIXI.Container) {
-  //   const x = target.x - 15
-  //   const y = target.y - 10
-  //   const width = target.width
-  //   const height = target.height
-  //   const star = this.drawStar(5)
-  //   star.scale.set(0.3, 0.3)
-  //   const startList = new TimelineLite()
-  //
   //   startList.addLabel('moving', 5)
-  //
-  //   const starContainer = new PIXI.display.Layer()
-  //   starContainer.position.set(x, y)
-  //   starContainer.height = height
-  //   starContainer.width = width
-  //   starContainer.addChild(star)
-  //
-  //   // starContainer.parentGroup = this._bottomGroup
-  //   starContainer.zIndex = 1
-  //   starContainer.parentLayer = this._layer
-  //
-  //   this._container.addChild(starContainer)
-  //
   //   TweenMax.to(starContainer.position, 1.5, {
   //     x: x + width * 2,
   //     repeat: -1,
   //     ease: Linear.easeNone
   //   })
-  //
   //   startList.play('moving')
-  //   const stars = new PIXI.display.Group(1, false)
-  //
-  //
-  //   return stars
-  // }
+
+  private crateCookie() {
+    const background = new PGraphics()
+    background.beginFill(Colors.red)
+      .drawRect(0, 0, 80, 40)
+      .endFill()
+    background.skew.set()
+    return background
+  }
 
   private createFPS() {
-    const FPS = createText("FPS:" + this.app.ticker.FPS.toFixed(2), 14)
+    const FPS = createText('FPS:' + this.app.ticker.FPS.toFixed(2), 14)
     FPS.skew.set(-0.5, 0)
     return FPS
   }

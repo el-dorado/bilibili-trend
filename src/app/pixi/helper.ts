@@ -1,3 +1,15 @@
+export function subscribe(obj) {
+  obj.interactive = true
+  obj.on('mousedown', onDragStart)
+    .on('touchstart', onDragStart)
+    .on('mouseup', onDragEnd)
+    .on('mouseupoutside', onDragEnd)
+    .on('touchend', onDragEnd)
+    .on('touchendoutside', onDragEnd)
+    .on('mousemove', onDragMove)
+    .on('touchmove', onDragMove)
+}
+
 export function addShadow(obj) {
   const gr = new PIXI.Graphics()
   gr.beginFill(0x0, 1)
