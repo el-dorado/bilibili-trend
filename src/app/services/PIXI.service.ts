@@ -24,21 +24,18 @@ import {
   onDragMove,
   onDragStart,
   createText,
+  PGraphics,
 } from '../pixi'
 
 @Injectable()
 export class PIXIService {
+
   private app: PIXI.Application
   private view: HTMLCanvasElement
   private stage: PIXI.Container
   private renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer
 
   public initialize(config: PIXIConfig) {
-    const render = () => {
-      this.renderer.render(this.stage)
-      requestAnimationFrame(render)
-    }
-
     const subscribe = (obj) => {
       obj.interactive = true
       obj.on('mousedown', onDragStart)
@@ -62,16 +59,15 @@ export class PIXIService {
     })
 
     this.app.stage = new PIXI.display.Stage()
-    this.app.stage.group.enableSort = true
-
     this.view = this.app.view
     this.stage = this.app.stage
     this.renderer = this.app.renderer
+    this.stage.group.enableSort = true
 
     this.app.renderer.autoResize = true
     Observable.fromEvent(window, 'resize')
       .pipe(debounceTime(200))
-      .subscribe((e: EventTarget | EventTargetLike | any) => {
+      .subscribe((e: EventTargetLike) => {
         let w
         let h
         if (window.innerWidth / window.innerHeight >= config.ratio) {
@@ -97,8 +93,8 @@ export class PIXIService {
 
     this.stage.addChild(FPSContaniner)
     this.stage.addChild(TitleContaniner)
-    subscribe(FPSContaniner)
 
+    subscribe(FPSContaniner)
     const FPS = this.createFPS()
     FPS.parentGroup = dragGroup
     // this.createFPSAnimation().map((v) => FPSContaniner.addChild(v))
@@ -107,10 +103,15 @@ export class PIXIService {
 
     const texts = this.createTitle()
     TitleContaniner.position.set(15, 50)
+
     texts.map((v) => {
       v.parentGroup = dragGroup
-      subscribe(v)
       TitleContaniner.addChild(v)
+    })
+
+    this.app.ticker.add((dalta) => {
+      FPS.text = this.app.ticker.FPS.toFixed(2)
+      this.renderer.render(this.stage)
     })
 
   }
@@ -128,6 +129,7 @@ export class PIXIService {
   // }
 
   private createTitle() {
+    PIXI.Graphics["oldx"] = 0
     let lastRectX = 0
     const style: TextStyleOptions = {
       fontFamily: ['persona', 'Arial'],
@@ -139,7 +141,7 @@ export class PIXIService {
       const text = new PIXI.Text(s, style)
       text.style.dropShadow = true
 
-      const rect = new PIXI.Graphics()
+      const rect = new PGraphics()
       rect.lineStyle(5, Colors.white, 1)
       rect.addChild(text)
 
@@ -157,14 +159,14 @@ export class PIXIService {
       text.position.x = rect.width / 2.5
 
       return {
-        red: (): PIXI.Graphics => {
+        red: (): PGraphics => {
           text.style.fill = Colors.white
           rect.beginFill(Colors.red)
           rect.drawRect(0, 0, width, height)
           rect.endFill()
           return rect
         },
-        black: (): PIXI.Graphics => {
+        black: (): PGraphics => {
           text.style.fill = Colors.red
           rect.beginFill(Colors.black)
           rect.drawRect(0, 0, width, height)
@@ -176,13 +178,37 @@ export class PIXIService {
 
     const texts = 'BiliBili 趋 势'.replace(/[ ]/g, '').split('')
 
-    return texts.map((s: string, i: number) => {
+    const title = texts.map((s: string, i: number) => {
       return Math.round(Math.random()) === 0
         ? generatorRect(s, i).red()
         : generatorRect(s, i).black()
-
+    })
+    title.map((v, i) => {
+      v.oldx = v.x
+      v.interactive = true
+      v.buttonMode = true
+      if (i !== title.length - 1) {
+        v.on("pointerdown", (e) => {
+          title.map((s) => {
+            TweenMax.to(s.position, 0.2, {
+              x: v.x,
+              ease: Linear.easeInOut,
+            })
+          })
+        })
+      }
     })
 
+    title[title.length - 1].on("pointerdown", (e) => {
+      title.map((s) => {
+        TweenMax.to(s.position, 0.2, {
+          x: s.oldx,
+          ease: Linear.easeInOut,
+        })
+      })
+    })
+
+    return title
   }
 
   // private addStarAnimation(target: PIXI.Container) {
@@ -242,7 +268,7 @@ export class PIXIService {
     // 线长度
     const len = offset * 2
 
-    const graphics = new PIXI.Graphics()
+    const graphics = new PGraphics()
 
     return range(0, 5, 1).map((v) => {
       const voffset = v * offset
